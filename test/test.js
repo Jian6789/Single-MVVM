@@ -46,11 +46,49 @@
 
 	__webpack_require__(1);
 	__webpack_require__(2);
-	module.exports = __webpack_require__(3);
+	__webpack_require__(3);
+	__webpack_require__(4);
+	module.exports = __webpack_require__(5);
 
 
 /***/ },
 /* 1 */
+/***/ function(module, exports) {
+
+	
+
+	export let arrayInit = function(){
+		Array.pop = function(){
+
+		}
+
+		Array.shift = function(){
+
+		}
+
+		Array.unshift = function(){
+			
+		}
+
+		Array.push = function(){
+			
+		}
+
+		Array.concat = function(){
+			
+		}
+
+		Array.del = function(){
+			
+		}
+
+		Array.insert = function(){
+			
+		}
+	}
+
+/***/ },
+/* 2 */
 /***/ function(module, exports) {
 
 	
@@ -77,25 +115,43 @@
 
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
-	import { err } from '../common/common.js'
+	
+
+	export default class Dep {
+		constructor(){
+			this.sub = [];
+		}
+
+		notify(){
+			
+		}
+	}
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	import { err } from '../common/common.js';
+	import { arrayInit } from '../arrInit/index.js';
 	import { Observe } from '../observe/index.js';
 
 	export default class Single {
 		constructor(options){
-			return Observe.prototype.observe(options.data);
+			arrayInit();
+			return new Observe(options.data);
 		}
 	}
 
 	window.Single = Single;
 
 /***/ },
-/* 3 */
+/* 5 */
 /***/ function(module, exports) {
 
-	import { isObject } from '../common/common.js';
+	import { isObject,isArray } from '../common/common.js';
 
 	export class Observe{
 		constructor(data){
@@ -106,13 +162,16 @@
 		}
 
 		walk(data){
-			Object.keys(data).forEach((key)=> this.convert(data,key,data[key]));		
+			let me = this;
+			Object.keys(data).forEach(function(key){
+				me.convert(data,key,data[key]);
+			});		
 		}
 
 		convert(data,key,value){
-			let ob = this;
-
-			Object.defineProperty(key,data,{
+			let ob = this,
+					children = new Observe(value);
+			Object.defineProperty(data,key,{
 				configurable:false,
 				enumerable:true,
 				get:function (){
@@ -122,8 +181,8 @@
 					if(value == newVal){
 						return;
 					}
-					value = newVal;
-					new Observe(newVal);
+					value = isArray(newVal) ? new ArrObj(newVal) : newVal;
+					children = new Observe(newVal);
 				}
 			});
 		}

@@ -1,4 +1,5 @@
-import { isObject } from '../common/common.js';
+import { isObject,isArray } from '../common/common.js';
+import { Dep,target } from '../dep/index.js';
 
 export class Observe{
 	constructor(data){
@@ -9,16 +10,21 @@ export class Observe{
 	}
 
 	walk(data){
-		Object.keys(data).forEach((key)=> this.convert(data,key,data[key]));		
+		let me = this;
+		Object.keys(data).forEach(function(key){
+			me.convert(data,key,data[key]);
+		});		
 	}
 
 	convert(data,key,value){
 		let ob = this,
-				children = new Observe(value);
+				children = new Observe(value),
+				dep = new Dep();
 		Object.defineProperty(data,key,{
 			configurable:false,
 			enumerable:true,
 			get:function (){
+				target && target.addDep(dep);
 				return value;
 			},
 			set:function (newVal) {
@@ -27,6 +33,7 @@ export class Observe{
 				}
 				value = newVal;
 				children = new Observe(newVal);
+				dep.notify();
 			}
 		});
 	}
