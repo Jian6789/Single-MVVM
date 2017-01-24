@@ -1,4 +1,16 @@
-import { Watcher } from '../watcher/index.js';
+import {
+	isFun,
+	regText
+} from '../common/common.js';
+import {
+	Watcher
+} from '../watcher/index.js';
+import {
+	ForDir
+} from './forDir.js';
+import {
+	IfDir
+} from './ifDir.js';
 
 /**
  * [dirUnit 指令-数据绑定单元]
@@ -13,8 +25,10 @@ export const dirUnit = {
 	 * @param  {[type]} keys [指令中对应的数据位置]
 	 */
 	text: (node, vm, keys) => {
-		this.bind(node, vm, keys, 'text');
+		dirUnit._bind(node, vm, keys, 'text');
 	},
+	if:(node, vm, keys)=> new IfDir(node, vm, keys),
+	for: (node, vm, keys) => new ForDir(node, vm, keys),
 
 	/**
 	 * [v-html指令]
@@ -23,7 +37,7 @@ export const dirUnit = {
 	 * @param  {[type]} keys [指令中对应的数据位置]
 	 */
 	html: (node, vm, keys) => {
-		this.bind(node, vm, keys, 'html');
+		dirUnit._bind(node, vm, keys, 'html');
 	},
 
 	/**
@@ -33,7 +47,7 @@ export const dirUnit = {
 	 * @param  {[type]} keys [指令中对应的数据位置]
 	 */
 	class: (node, vm, keys) => {
-		this.bind(node, vm, keys, 'class');
+		dirUnit._bind(node, vm, keys, 'class');
 	},
 
 	/**
@@ -43,17 +57,18 @@ export const dirUnit = {
 	 * @param  {[type]} keys [指令中对应的数据位置]
 	 */
 	model: (node, vm, keys) => {
-		this.bind(node, vm, keys, 'model');
+		dirUnit._bind(node, vm, keys, 'model');
 		let me = this,
 			_data = vm.$data,
-			oldVal = me._getVal(keys, _data);
+			oldVal = dirUnit._getVal(keys, _data);
 		node.addEventListener('input', (event) => {
+			oldVal = dirUnit._getVal(keys, _data);
 			let ev = event || window.event,
 				val = ev.target.value;
 			if (val == oldVal) {
 				return;
 			}
-			me._setVal(keys, _data, val);
+			dirUnit._setVal(keys, _data, val);
 
 		}, true);
 	},
@@ -82,9 +97,11 @@ export const dirUnit = {
 	 */
 	_bind: (node, vm, keys, dir) => {
 		let fn = upper[dir + 'Upper'];
-		isFun(fn) && fn(node, _getVal(keys, vm.$data));
-
-		new Watcher(vm, keys, (val, newVal) => {
+		isFun(fn) && fn(node, dirUnit._getVal(keys, vm.$data));
+		if (dir === 'model') {
+			return;
+		}
+		new Watcher(vm, keys, (newVal, val) => {
 			isFun(fn) && fn(node, newVal, val);
 		});
 	},
@@ -95,7 +112,7 @@ export const dirUnit = {
 	 * @param  {[obj]} val  [数据所在位置 / 数据]
 	 */
 	_getVal: (keys, data) => {
-		keys.split(',').forEach(function(key) {
+		keys.split('.').forEach(function(key) {
 			data = data[key];
 		});
 		return data;
@@ -108,8 +125,8 @@ export const dirUnit = {
 	 * @param  {[any]} val  [新值]
 	 */
 	_setVal: (keys, data, val) => {
-		let _keys = keys.split(','),
-				len = _keys.length - 1;
+		let _keys = keys.split('.'),
+			len = _keys.length - 1;
 		_keys.forEach((key, i) => {
 			if (i == len) {
 				data[key] = val;
@@ -127,8 +144,8 @@ export const dirUnit = {
  * @param  {[any]} val  	[原值]
  */
 const upper = {
-	textUpper: (node, newVal) => {
-		node.textContent = newVal;
+	textUpper: (node, newVal, oldVal) => {
+		node.textContent = node.textContent.replace((oldVal ? oldVal : regText), newVal);
 	},
 
 	htmlUpper: (node, newVal) => {
@@ -140,7 +157,11 @@ const upper = {
 	},
 
 	classUpper: (node, newVal, val) => {
-		node.className = val ?
-			node.className.replace(val, newVal) : (node.className + newVal);
+		node.className = (val ?
+			node.className.replace(val, newVal) : (node.className + (newVal ? ' ' : '') + newVal)).trim();
 	}
+}
+
+export function changHtml(html) {
+	return document.createRange().createContextualFragment(html);
 }

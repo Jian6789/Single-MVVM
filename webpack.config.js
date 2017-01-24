@@ -1,16 +1,16 @@
 module.exports = {
     devtool: 'source-map',
     entry: {
-        mvvm: './src/main/index.js'
+        single: './src/main/index.js'
     },
     output: {
-        path: './test',
-        filename: '[name].js'
+        path: './dist',
+        filename: '[name].min.js'
     },
     module: {
         loaders: [
             {
-                test: /\.(js)$/,                   
+                test: /\.(js)$/,
                 loader: 'babel-loader'  
             }
         ]

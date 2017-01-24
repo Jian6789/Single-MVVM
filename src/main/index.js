@@ -1,20 +1,73 @@
-import { err,isFun } from '../common/common.js';
-import { arrayInit } from '../arrInit/index.js';
-import { Observe } from '../observe/index.js';
-import { Compile } from '../compile/index.js';
+import {
+	VM
+} from '../vm/index.js';
+import {
+	ajax
+} from '../ajax/index.js';
+import {
+	isFun
+} from '../common/common.js';
 
-export default class Single {
-	constructor(options){
-		arrayInit();
-		this.$opts = options;
-		this.$data = options.data;
-		if(isFun(options)){
-			options.data = options.data();
+class Single {
+	constructor() {
+		this.Routers = [];
+		this.VM = VM;
+		this.page = null;
+		this.ajax = ajax;
+		let me = this;
+		window.addEventListener('load', function() {
+			me.urlChange();
+		});
+		window.addEventListener('hashchange', function() {
+			me.urlChange();
+		});
+	}
+
+	urlChange() {
+		let router = this.getRouter();
+		if(router){
+			this.loadTemplate(router.tempUrl,router.ctrUrl);
 		}
-		new Observe(options.data);
+	}
 
-		this.$compile = new Compile(options.el || document.body,this);
+	getRouter() {
+		let curURL = this.getURL(),
+			router = this.Routers.find(function(item) {
+				return item.url === curURL;
+			});
+		return router ? router : this.Routers[0];
+	}
+
+	getURL() {
+		return location.hash.split("?")[0].split("#")[1];
+	}
+
+	loadScript(url) {
+		let script = document.createElement('script'),
+			me = this;
+		script.src = url;
+		script.async = true;
+		script.onload = function() {
+			document.body.removeChild(script);
+			if(isFun(me.page)){
+				me.page();
+			}
+		}
+		document.body.appendChild(script);
+	}
+
+	loadTemplate(tempUrl,ctrUrl) {
+		let me = this;
+		me.ajax({
+			type: 'GET',
+			url: tempUrl,
+			async:false,
+			success: function(result) {
+				document.getElementById('sp-app').innerHTML = result;
+				me.loadScript(ctrUrl);
+			}
+		});
 	}
 }
 
-window.Single = Single;
+window.Single = new Single();

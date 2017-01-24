@@ -1,6 +1,6 @@
+export let regText = /\{\{(.+)\}\}/;
 
-
-export function isObject(val){
+export function isObject(val) {
 	return typeof val === 'object';
 }
 
@@ -20,29 +20,39 @@ export function err(str) {
 	throw new Error(str);
 }
 
-export function isEleNode(node){
+export function isEleNode(node) {
 	return node.nodeType === 1;
 }
 
-export function isAttrNode(node){
+export function isAttrNode(node) {
 	return node.nodeType === 2;
 }
 
-export function isTextNode(node){
+export function isTextNode(node) {
 	return node.nodeType === 3;
 }
 
-let arr = [];
-let slice = arr.slice.call;
-
-export function toArray(val){
-	return slice(val);
+export function toArray(val) {
+	return [].slice.call(val);
 }
 
-export function isDir(str){
-	return str.indexOf('v-') === 0;
+export function isDir(str) {
+	return str.indexOf('s-') === 0;
 }
 
-export function isEventDir(str){
+export function isEventDir(str) {
 	return str.indexOf('on') === 0;
+}
+
+export function isForDir(str) {
+	return str.indexOf('for') === 0;
+}
+
+export function insertAfter(newNode, target) {
+	var parent = target.parentNode;
+	if (parent.lastElementChild == target) {
+		parent.appendChild(newNode);
+	} else {
+		parent.insertBefore(newNode, target.nextSibling);
+	}
 }
