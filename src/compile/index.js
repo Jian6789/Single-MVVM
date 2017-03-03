@@ -13,10 +13,11 @@ import {
 
 
 export class Compile {
-	constructor(el, vm) {
+	constructor(el, vm, isDel) {
 		this.$vm = vm;
 		this.$opts = this.$vm.$opts;
 		this.$data = this.$opts.data;
+		this.$isDel = isDel || false;
 		this.$el = el.nodeType ? el : document.querySelector(el);
 
 		if (this.$el) {
@@ -81,6 +82,8 @@ export class Compile {
 				} else {
 					dirUnit[dirName](node, me.$vm, dirVal);
 				}
+			} else if (regText.test(attr.textContent)) {
+				dirUnit.text(attr, me.$vm, RegExp.$1.trim());
 			}
 		});
 	}

@@ -28,7 +28,7 @@ function encodeFormat(obj) {
 function ajaxJsonp(ao) {
 	if (!ao.jsonp) throw new Error('请输入函数名称');
 	let fnName = 'jsonp' + '_' + (jsonpId++);
-	ao.url = ao.url + ao.jsonp + '=' + fnName;
+	ao.url = ao.url + ((ao.url.indexOf('?') == -1 ? '?' : '&')) + ao.jsonp + '=' + fnName;
 	let script = document.createElement('script');
 	global[fnName] = function(response) {
 		try {

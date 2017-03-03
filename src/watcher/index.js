@@ -55,6 +55,6 @@ export class Watcher {
 			return;
 		}
 		this.val = newVal;
-		this._fn.call(this.$vm, newVal, val);
+		this._fn.call(this.$vm, newVal, val, this);
 	}
 }

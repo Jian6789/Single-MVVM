@@ -1,4 +1,7 @@
 import {
+	toArray
+} from '../common/common.js';
+import {
 	dirUnit
 } from './index.js';
 import {
@@ -24,9 +27,10 @@ export class ForDir {
 
 	bind(node, vm, keys) {
 		let arrName = keys.split('in')[1].trim(),
-			me = this;
+			me = this,
+			reg = /\.(\d)+\./g
 		me.upper(node, vm, keys);
-		new Watcher(vm, arrName, (val, newVal) => {
+		new Watcher(vm, arrName, (val, newVal,watcher) => {
 			while (this.start.nextSibling != this.end) {
 				this.end.parentNode.removeChild(this.start.nextSibling);
 			}
@@ -49,12 +53,13 @@ export class ForDir {
 			arrName = keys.split('in')[1].trim(),
 			arr = dirUnit._getVal(arrName, vm.$data),
 			html = node.outerHTML,
+			reg = new RegExp(item,'gm'),
 			box = '';
 		for (let i = 0, len = arr.length; i < len; i++) {
-			box += html.replace(item, arrName + '.' + i);
+			box += html.replace(reg, arrName + '.' + i);
 		};
 		box = changHtml(box);
-		new Compile(box, vm);
+		new Compile(box, vm, true);
 		this.end.parentNode.insertBefore(box, this.end);
 
 		if (node.parentNode) {

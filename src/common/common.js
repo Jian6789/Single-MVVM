@@ -1,6 +1,9 @@
 export let regText = /\{\{(.+)\}\}/;
 
 export function isObject(val) {
+	if(val == undefined){
+		return false;
+	}
 	return typeof val === 'object';
 }
 

@@ -1,5 +1,4 @@
-import { err,isFun } from '../common/common.js';
-import { arrayInit } from '../arrInit/index.js';
+import { err, isFun } from '../common/common.js';
 import { Observe } from '../observe/index.js';
 import { Compile } from '../compile/index.js';
 
@@ -7,15 +6,13 @@ import { Compile } from '../compile/index.js';
  * 入口对象
  */
 export class VM {
-	constructor(options){
-		arrayInit();
+	constructor(options) {
 		this.$opts = options;
 		this.$data = options.data;
-		if(isFun(options)){
+		if (isFun(options)) {
 			options.data = options.data();
-		}
-		new Observe(options.data);
+		} this.$observe = new Observe(options.data);
 
-		this.$compile = new Compile(options.el || document.body,this);
+		this.$compile = new Compile(options.el || document.body, this);
 	}
 }

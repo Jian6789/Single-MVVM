@@ -4,7 +4,7 @@ module.exports = {
         single: './src/main/index.js'
     },
     output: {
-        path: './dist',
+        path: '../SportPrice/WebApp/www/libs/single',
         filename: '[name].min.js'
     },
     module: {
