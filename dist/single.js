@@ -50,7 +50,7 @@
 	
 	var _index = __webpack_require__(1);
 	
-	var _index2 = __webpack_require__(11);
+	var _index2 = __webpack_require__(10);
 	
 	var _common = __webpack_require__(2);
 	
@@ -85,9 +85,7 @@
 			key: 'getRouter',
 			value: function getRouter() {
 				var curURL = this.getURL(),
-				    router = this.Routers.find(function (item) {
-					return item.url === curURL;
-				});
+				    router = this.Routers[curURL];
 				return router ? router : this.Routers[0];
 			}
 		}, {
@@ -146,9 +144,7 @@
 	
 	var _index = __webpack_require__(3);
 	
-	var _index2 = __webpack_require__(4);
-	
-	var _index3 = __webpack_require__(7);
+	var _index2 = __webpack_require__(6);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -158,15 +154,13 @@
 	var VM = exports.VM = function VM(options) {
 		_classCallCheck(this, VM);
 	
-		(0, _index.arrayInit)();
 		this.$opts = options;
 		this.$data = options.data;
 		if ((0, _common.isFun)(options)) {
 			options.data = options.data();
-		}
-		new _index2.Observe(options.data);
+		}this.$observe = new _index.Observe(options.data);
 	
-		this.$compile = new _index3.Compile(options.el || document.body, this);
+		this.$compile = new _index2.Compile(options.el || document.body, this);
 	};
 
 /***/ },
@@ -197,6 +191,9 @@
 	var regText = exports.regText = /\{\{(.+)\}\}/;
 	
 	function isObject(val) {
+		if (val == undefined) {
+			return false;
+		}
 		return (typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object';
 	}
 	
@@ -260,87 +257,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.arrayInit = undefined;
-	
-	var _common = __webpack_require__(2);
-	
-	/**
-	 * [arrayInit 数组扩展函数]
-	 * @return {[type]} [description]
-	 */
-	var arrayInit = exports.arrayInit = function arrayInit() {
-	
-		/**
-	  * [_copy 浅拷贝数组]
-	  */
-		Array.prototype._copy = function () {
-			return [].slice.call(this);
-		};
-	
-		/**
-	  * [_del 删除数组制定下标的元素]
-	  * @param  {[type]} index [数组下标]
-	  */
-		Array.prototype._del = function (index) {
-			return this.filter(function (item, i) {
-				return i !== index;
-			});
-		};
-	
-		/**
-	  * [_pop 删除数组中第一个元素]
-	  * @return {[type]} [description]
-	  */
-		Array.prototype._pop = function () {
-			return this._del(0);
-		};
-	
-		/**
-	  * [_shift 删除数组最后一个元素]
-	  * @return {[type]} [description]
-	  */
-		Array.prototype._shift = function () {
-			return this._del(this.length - 1);
-		};
-	
-		/**
-	  * [_insert 在数组指定位置插入元素]
-	  * @param  {[type]} index [下标]
-	  * @param  {[type]} item  [元素]
-	  */
-		Array.prototype._insert = function (index, item) {
-			var result = this._copy();
-			result.splice(index, 0, item);
-			return result;
-		};
-	
-		/**
-	  * [_push 在数组末尾增加元素]
-	  * @param  {[type]} item [元素]
-	  */
-		Array.prototype._push = function (item) {
-			return this._insert(this.length, item);
-		};
-	
-		/**
-	  * [_unpop 在数组开始增加元素]
-	  * @param  {[type]} item [元素]
-	  */
-		Array.prototype._unpop = function (item) {
-			return this._insert(0, item);
-		};
-	};
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
+	    value: true
 	});
 	exports.Observe = undefined;
 	
@@ -348,9 +265,9 @@
 	
 	var _common = __webpack_require__(2);
 	
-	var _index = __webpack_require__(5);
+	var _index = __webpack_require__(4);
 	
-	var _index2 = __webpack_require__(6);
+	var _index2 = __webpack_require__(5);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -358,77 +275,77 @@
 	 * 发布者对象
 	 */
 	var Observe = exports.Observe = function () {
-		function Observe(data) {
-			_classCallCheck(this, Observe);
+	    function Observe(data) {
+	        _classCallCheck(this, Observe);
 	
-			if (!(0, _common.isObject)(data)) {
-				return;
-			}
-			this.walk(data);
-		}
+	        if (!(0, _common.isObject)(data)) {
+	            return;
+	        }
+	        this.walk(data);
+	    }
 	
-		/**
-	  * [walk 对数据中属性进行遍历劫持]
-	  * @param  {[type]} data [待劫持数据]
-	  */
+	    /**
+	     * [walk 对数据中属性进行遍历劫持]
+	     * @param  {[type]} data [待劫持数据]
+	     */
 	
 	
-		_createClass(Observe, [{
-			key: 'walk',
-			value: function walk(data) {
-				var me = this,
-				    hadProperty = Object.getOwnPropertyDescriptor;
-				Object.keys(data).forEach(function (key) {
-					if ((0, _common.isFun)(hadProperty(data, key).set)) {
-						return;
-					}
-					me.convert(data, key, data[key]);
-				});
-			}
+	    _createClass(Observe, [{
+	        key: 'walk',
+	        value: function walk(data) {
+	            var me = this,
+	                hadProperty = Object.getOwnPropertyDescriptor;
+	            Object.keys(data).forEach(function (key) {
+	                if ((0, _common.isFun)(hadProperty(data, key).set)) {
+	                    return;
+	                }
+	                me.convert(data, key, data[key]);
+	            });
+	        }
 	
-			/**
-	   * [convert 递归数据劫持]
-	   * @param  {[type]} data  [待劫持数据]
-	   * @param  {[type]} key   [待劫持数据属性名]
-	   * @param  {[type]} value [待劫持数据值]
-	   */
+	        /**
+	         * [convert 递归数据劫持]
+	         * @param  {[type]} data  [待劫持数据]
+	         * @param  {[type]} key   [待劫持数据属性名]
+	         * @param  {[type]} value [待劫持数据值]
+	         */
 	
-		}, {
-			key: 'convert',
-			value: function convert(data, key, value) {
-				var ob = this,
-				    children = new Observe(value),
-				    dep = new _index.Dep();
-				Object.defineProperty(data, key, {
-					configurable: false,
-					enumerable: true,
-					get: function get() {
-						_index2.target && _index2.target.addDep(dep);
-						return value;
-					},
-					set: function set(newVal) {
-						if (value == newVal) {
-							return;
-						}
-						value = newVal;
-						children = new Observe(newVal);
-						dep.notify();
-					}
-				});
-			}
-		}]);
+	    }, {
+	        key: 'convert',
+	        value: function convert(data, key, value) {
+	            var ob = this,
+	                children = new Observe(value),
+	                dep = new _index.Dep();
+	            Object.defineProperty(data, key, {
+	                configurable: false,
+	                enumerable: true,
+	                get: function get() {
+	                    _index2.target && _index2.target.addDep(dep);
+	                    return value;
+	                },
+	                set: function set(newVal) {
+	                    if (value == newVal) {
+	                        return;
+	                    }
+	                    value = newVal;
+	                    children = new Observe(newVal);
+	                    dep.notify((0, _common.isArray)(newVal));
+	                }
+	            });
+	        }
+	    }]);
 
-		return Observe;
+	    return Observe;
 	}();
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
-		value: true
+	    value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -442,53 +359,63 @@
 	 */
 	
 	var Dep = exports.Dep = function () {
-		function Dep() {
-			_classCallCheck(this, Dep);
+	    function Dep() {
+	        _classCallCheck(this, Dep);
 	
-			this.id = uid++;
-			this.sub = [];
-		}
+	        this.id = uid++;
+	        this.sub = [];
+	    }
 	
-		/**
-	  * [addSub 在sub中增加订阅者]
-	  * @param {[type]} watcher [订阅者 Watcher 对象]
-	  */
+	    /**
+	     * [addSub 在sub中增加订阅者]
+	     * @param {[type]} watcher [订阅者 Watcher 对象]
+	     */
 	
 	
-		_createClass(Dep, [{
-			key: "addSub",
-			value: function addSub(watcher) {
-				this.sub.push(watcher);
-			}
+	    _createClass(Dep, [{
+	        key: "addSub",
+	        value: function addSub(watcher) {
+	            this.sub.push(watcher);
+	        }
+	    }, {
+	        key: "rmSub",
+	        value: function rmSub(sub) {
+	            var reg = /\.(\d)+\./g;
+	            return sub.filter(function (item) {
+	                return !item.$keys.match(reg);
+	            });
+	        }
+	        /**
+	         * [depend 触发 Wtacher 的add事件，将dep加入 Watcher]
+	         */
 	
-			/**
-	   * [depend 触发 Wtacher 的add事件，将dep加入 Watcher]
-	   */
+	    }, {
+	        key: "depend",
+	        value: function depend() {
+	            target.addDep(this);
+	        }
 	
-		}, {
-			key: "depend",
-			value: function depend() {
-				target.addDep(this);
-			}
+	        /**
+	         * [notify 绑定数据set出发此方法，对sub中Watcher进行遍历触发update]
+	         */
 	
-			/**
-	   * [notify 绑定数据set出发此方法，对sub中Watcher进行遍历触发update]
-	   */
-	
-		}, {
-			key: "notify",
-			value: function notify() {
-				this.sub.forEach(function (item) {
-					item.update();
-				});
-			}
-		}]);
+	    }, {
+	        key: "notify",
+	        value: function notify(isArr) {
+	            if (isArr) {
+	                this.sub = this.rmSub(this.sub);
+	            }
+	            this.sub.forEach(function (item) {
+	                item.update();
+	            });
+	        }
+	    }]);
 
-		return Dep;
+	    return Dep;
 	}();
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -574,7 +501,7 @@
 					return;
 				}
 				this.val = newVal;
-				this._fn.call(this.$vm, newVal, val);
+				this._fn.call(this.$vm, newVal, val, this);
 			}
 		}]);
 
@@ -582,7 +509,7 @@
 	}();
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -596,17 +523,18 @@
 	
 	var _common = __webpack_require__(2);
 	
-	var _index = __webpack_require__(8);
+	var _index = __webpack_require__(7);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var Compile = exports.Compile = function () {
-		function Compile(el, vm) {
+		function Compile(el, vm, isDel) {
 			_classCallCheck(this, Compile);
 	
 			this.$vm = vm;
 			this.$opts = this.$vm.$opts;
 			this.$data = this.$opts.data;
+			this.$isDel = isDel || false;
 			this.$el = el.nodeType ? el : document.querySelector(el);
 	
 			if (this.$el) {
@@ -680,6 +608,8 @@
 						} else {
 							_index.dirUnit[dirName](node, me.$vm, dirVal);
 						}
+					} else if (_common.regText.test(attr.textContent)) {
+						_index.dirUnit.text(attr, me.$vm, RegExp.$1.trim());
 					}
 				});
 			}
@@ -689,24 +619,24 @@
 	}();
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-		value: true
+	    value: true
 	});
 	exports.dirUnit = undefined;
 	exports.changHtml = changHtml;
 	
 	var _common = __webpack_require__(2);
 	
-	var _index = __webpack_require__(6);
+	var _index = __webpack_require__(5);
 	
-	var _forDir = __webpack_require__(9);
+	var _forDir = __webpack_require__(8);
 	
-	var _ifDir = __webpack_require__(10);
+	var _ifDir = __webpack_require__(9);
 	
 	/**
 	 * [dirUnit 指令-数据绑定单元]
@@ -714,126 +644,123 @@
 	 */
 	var dirUnit = exports.dirUnit = {
 	
-		/**
-	  * [v-text指令 \ {{.+}}绑定数据修改函数]
-	  * @param  {[type]} node [需要更新的节点]
-	  * @param  {Single} vm   [创建的全局对象]
-	  * @param  {[type]} keys [指令中对应的数据位置]
-	  */
-		text: function text(node, vm, keys) {
-			dirUnit._bind(node, vm, keys, 'text');
-		},
-		if: function _if(node, vm, keys) {
-			return new _ifDir.IfDir(node, vm, keys);
-		},
-		for: function _for(node, vm, keys) {
-			return new _forDir.ForDir(node, vm, keys);
-		},
+	    /**
+	     * [v-text指令 \ {{.+}}绑定数据修改函数]
+	     * @param  {[type]} node [需要更新的节点]
+	     * @param  {Single} vm   [创建的全局对象]
+	     * @param  {[type]} keys [指令中对应的数据位置]
+	     */
+	    text: function text(node, vm, keys) {
+	        dirUnit._bind(node, vm, keys, 'text');
+	    },
+	    if: function _if(node, vm, keys) {
+	        return new _ifDir.IfDir(node, vm, keys);
+	    },
 	
-		/**
-	  * [v-html指令]
-	  * @param  {[type]} node [需要更新的节点]
-	  * @param  {Single} vm   [创建的全局对象]
-	  * @param  {[type]} keys [指令中对应的数据位置]
-	  */
-		html: function html(node, vm, keys) {
-			dirUnit._bind(node, vm, keys, 'html');
-		},
+	    for: function _for(node, vm, keys) {
+	        return new _forDir.ForDir(node, vm, keys);
+	    },
 	
-		/**
-	  * [v-class指令]
-	  * @param  {[type]} node [需要更新的节点]
-	  * @param  {Single} vm   [创建的全局对象]
-	  * @param  {[type]} keys [指令中对应的数据位置]
-	  */
-		class: function _class(node, vm, keys) {
-			dirUnit._bind(node, vm, keys, 'class');
-		},
+	    /**
+	     * [v-html指令]
+	     * @param  {[type]} node [需要更新的节点]
+	     * @param  {Single} vm   [创建的全局对象]
+	     * @param  {[type]} keys [指令中对应的数据位置]
+	     */
+	    html: function html(node, vm, keys) {
+	        dirUnit._bind(node, vm, keys, 'html');
+	    },
 	
-		/**
-	  * [v-model指令]
-	  * @param  {[type]} node [需要更新的节点]
-	  * @param  {Single} vm   [创建的全局对象]
-	  * @param  {[type]} keys [指令中对应的数据位置]
-	  */
-		model: function model(node, vm, keys) {
-			dirUnit._bind(node, vm, keys, 'model');
-			var me = undefined,
-			    _data = vm.$data,
-			    oldVal = dirUnit._getVal(keys, _data);
-			node.addEventListener('input', function (event) {
-				oldVal = dirUnit._getVal(keys, _data);
-				var ev = event || window.event,
-				    val = ev.target.value;
-				if (val == oldVal) {
-					return;
-				}
-				dirUnit._setVal(keys, _data, val);
-			}, true);
-		},
+	    /**
+	     * [v-class指令]
+	     * @param  {[type]} node [需要更新的节点]
+	     * @param  {Single} vm   [创建的全局对象]
+	     * @param  {[type]} keys [指令中对应的数据位置]
+	     */
+	    class: function _class(node, vm, keys) {
+	        dirUnit._bind(node, vm, keys, 'class');
+	    },
 	
-		/**
-	  * [v-on:ev 事件指令]
-	  * @param  {[type]} node   [需要更新的节点]
-	  * @param  {[type]} vm     [创建的全局对象]
-	  * @param  {[type]} dirVal [指令中的值]
-	  * @param  {[type]} dir    [指令名]
-	  */
-		event: function event(node, vm, dirVal, dir) {
-			var ev = dir.split(':')[1],
-			    fn = vm.$opts.event[dirVal];
-			if ((0, _common.isFun)(fn)) {
-				node.addEventListener(ev, fn.bind(vm), false);
-			}
-		},
+	    /**
+	     * [v-model指令]
+	     * @param  {[type]} node [需要更新的节点]
+	     * @param  {Single} vm   [创建的全局对象]
+	     * @param  {[type]} keys [指令中对应的数据位置]
+	     */
+	    model: function model(node, vm, keys) {
+	        dirUnit._bind(node, vm, keys, 'model');
+	        var me = undefined,
+	            _data = vm.$data,
+	            oldVal = dirUnit._getVal(keys, _data);
+	        node.addEventListener('input', function (event) {
+	            oldVal = dirUnit._getVal(keys, _data);
+	            var ev = event || window.event,
+	                val = ev.target.value;
+	            if (val == oldVal) {
+	                return;
+	            }
+	            dirUnit._setVal(keys, _data, val);
+	        }, true);
+	    },
+	    /**
+	     * [v-on:ev 事件指令]
+	     * @param  {[type]} node   [需要更新的节点]
+	     * @param  {[type]} vm     [创建的全局对象]
+	     * @param  {[type]} dirVal [指令中的值]
+	     * @param  {[type]} dir    [指令名]
+	     */
+	    event: function event(node, vm, dirVal, dir) {
+	        var ev = dir.split(':')[1],
+	            fn = vm.$opts.event[dirVal];
+	        if ((0, _common.isFun)(fn)) {
+	            node.addEventListener(ev, fn.bind(vm), false);
+	        }
+	    },
 	
-		/**
-	  * [将节点值与数据进行绑定，当数据修改时，遍历该数据所有订阅者dep.sub，调用 Watcher 中的匿名函数]
-	  * @param  {[type]} node [需要更新的节点]
-	  * @param  {[type]} vm   [创建的全局对象]
-	  * @param  {[type]} keys [指令中对应的数据位置]
-	  * @param  {[type]} dir  [指令名]
-	  */
-		_bind: function _bind(node, vm, keys, dir) {
-			var fn = upper[dir + 'Upper'];
-			(0, _common.isFun)(fn) && fn(node, dirUnit._getVal(keys, vm.$data));
-			if (dir === 'model') {
-				return;
-			}
-			new _index.Watcher(vm, keys, function (newVal, val) {
-				(0, _common.isFun)(fn) && fn(node, newVal, val);
-			});
-		},
+	    /**
+	     * [将节点值与数据进行绑定，当数据修改时，遍历该数据所有订阅者dep.sub，调用 Watcher 中的匿名函数]
+	     * @param  {[type]} node [需要更新的节点]
+	     * @param  {[type]} vm   [创建的全局对象]
+	     * @param  {[type]} keys [指令中对应的数据位置]
+	     * @param  {[type]} dir  [指令名]
+	     */
+	    _bind: function _bind(node, vm, keys, dir) {
+	        var fn = upper[dir + 'Upper'];
+	        (0, _common.isFun)(fn) && fn(node, dirUnit._getVal(keys, vm.$data));
+	        new _index.Watcher(vm, keys, function (newVal, val) {
+	            (0, _common.isFun)(fn) && fn(node, newVal, val);
+	        });
+	    },
 	
-		/**
-	  * [根据指令值获取绑定的数据值]
-	  * @param  {[str]} keys [指令中对应的数据位置]
-	  * @param  {[obj]} val  [数据所在位置 / 数据]
-	  */
-		_getVal: function _getVal(keys, data) {
-			keys.split('.').forEach(function (key) {
-				data = data[key];
-			});
-			return data;
-		},
+	    /**
+	     * [根据指令值获取绑定的数据值]
+	     * @param  {[str]} keys [指令中对应的数据位置]
+	     * @param  {[obj]} val  [数据所在位置 / 数据]
+	     */
+	    _getVal: function _getVal(keys, data) {
+	        keys.split('.').forEach(function (key) {
+	            data = data[key];
+	        });
+	        return data;
+	    },
 	
-		/**
-	  * [设置data中的某项的值，触发set]
-	  * @param  {[str]} keys [指令中对应的数据位置]
-	  * @param  {[obj]} data [new Single() 参数对象 data]
-	  * @param  {[any]} val  [新值]
-	  */
-		_setVal: function _setVal(keys, data, val) {
-			var _keys = keys.split('.'),
-			    len = _keys.length - 1;
-			_keys.forEach(function (key, i) {
-				if (i == len) {
-					data[key] = val;
-				} else {
-					data = data[key];
-				}
-			});
-		}
+	    /**
+	     * [设置data中的某项的值，触发set]
+	     * @param  {[str]} keys [指令中对应的数据位置]
+	     * @param  {[obj]} data [new Single() 参数对象 data]
+	     * @param  {[any]} val  [新值]
+	     */
+	    _setVal: function _setVal(keys, data, val) {
+	        var _keys = keys.split('.'),
+	            len = _keys.length - 1;
+	        _keys.forEach(function (key, i) {
+	            if (i == len) {
+	                data[key] = val;
+	            } else {
+	                data = data[key];
+	            }
+	        });
+	    }
 	};
 	
 	/**
@@ -843,29 +770,30 @@
 	 * @param  {[any]} val  	[原值]
 	 */
 	var upper = {
-		textUpper: function textUpper(node, newVal, oldVal) {
-			node.textContent = node.textContent.replace(oldVal ? oldVal : _common.regText, newVal);
-		},
+	    textUpper: function textUpper(node, newVal, oldVal) {
+	        oldVal = oldVal != undefined ? oldVal + '' : _common.regText;
+	        node.textContent = node.textContent.replace(oldVal, newVal);
+	    },
 	
-		htmlUpper: function htmlUpper(node, newVal) {
-			node.innerHTML = newVal;
-		},
+	    htmlUpper: function htmlUpper(node, newVal) {
+	        node.innerHTML = newVal;
+	    },
 	
-		modelUpper: function modelUpper(node, newVal, val) {
-			node.value = newVal ? newVal : '';
-		},
+	    modelUpper: function modelUpper(node, newVal, val) {
+	        node.value = newVal ? newVal : '';
+	    },
 	
-		classUpper: function classUpper(node, newVal, val) {
-			node.className = (val ? node.className.replace(val, newVal) : node.className + (newVal ? ' ' : '') + newVal).trim();
-		}
+	    classUpper: function classUpper(node, newVal, val) {
+	        node.className = (val ? node.className.replace(val, newVal) : node.className + ' ' + newVal).trim();
+	    }
 	};
 	
 	function changHtml(html) {
-		return document.createRange().createContextualFragment(html);
+	    return document.createRange().createContextualFragment(html);
 	}
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -877,13 +805,15 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _index = __webpack_require__(8);
+	var _common = __webpack_require__(2);
 	
-	var _index2 = __webpack_require__(7);
+	var _index = __webpack_require__(7);
 	
-	var _index3 = __webpack_require__(8);
+	var _index2 = __webpack_require__(6);
 	
-	var _index4 = __webpack_require__(6);
+	var _index3 = __webpack_require__(7);
+	
+	var _index4 = __webpack_require__(5);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -907,9 +837,10 @@
 				var _this = this;
 	
 				var arrName = keys.split('in')[1].trim(),
-				    me = this;
+				    me = this,
+				    reg = /\.(\d)+\./g;
 				me.upper(node, vm, keys);
-				new _index4.Watcher(vm, arrName, function (val, newVal) {
+				new _index4.Watcher(vm, arrName, function (val, newVal, watcher) {
 					while (_this.start.nextSibling != _this.end) {
 						_this.end.parentNode.removeChild(_this.start.nextSibling);
 					}
@@ -933,12 +864,13 @@
 				    arrName = keys.split('in')[1].trim(),
 				    arr = _index.dirUnit._getVal(arrName, vm.$data),
 				    html = node.outerHTML,
+				    reg = new RegExp(item, 'gm'),
 				    box = '';
 				for (var i = 0, len = arr.length; i < len; i++) {
-					box += html.replace(item, arrName + '.' + i);
+					box += html.replace(reg, arrName + '.' + i);
 				};
 				box = (0, _index3.changHtml)(box);
-				new _index2.Compile(box, vm);
+				new _index2.Compile(box, vm, true);
 				this.end.parentNode.insertBefore(box, this.end);
 	
 				if (node.parentNode) {
@@ -951,7 +883,7 @@
 	}();
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -963,13 +895,13 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _index = __webpack_require__(8);
+	var _index = __webpack_require__(7);
 	
-	var _index2 = __webpack_require__(7);
+	var _index2 = __webpack_require__(6);
 	
-	var _index3 = __webpack_require__(8);
+	var _index3 = __webpack_require__(7);
 	
-	var _index4 = __webpack_require__(6);
+	var _index4 = __webpack_require__(5);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -1024,7 +956,7 @@
 	}();
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -1035,29 +967,34 @@
 	exports.ajax = ajax;
 	
 	var jsonpId = 0;
+	
 	function ajax(aD) {
 		if (!aD.url) throw new Error('请输入正确的URL!');
+	
 		aD.type = aD.type || 'GET';
 		aD.async = aD.async || true;
 		aD.data = encodeFormat(aD.data);
-		aD.url = aD.type == 'POST' ? aD.url : aD.url + (aD.url.indexOf('?') == -1 ? '?' : '&') + aD.data;
+		aD.header = aD.header || "application/x-www-form-urlencoded";
+		aD.url = aD.type == 'POST' ? saD.url : aD.url + (aD.url.indexOf('?') == -1 ? '?' : '&') + aD.data;
+	
 		if (aD.type == 'jsonp') {
 			ajaxJsonp(aD);
 			return false;
 		}
+	
 		var re = new XMLHttpRequest();
+	
 		re.open(aD.type, aD.url, aD.async);
-		re.onreadystatechange = function () {
-			if (re.readyState == 4 && aD.success) {
-				aD.success(re.response);
-			}
-		};
+		aD.type.toUpperCase == 'POST' && re.setRequestHeader("content-type", aD.header);
+	
+		re.addEventListener('readystatechange', function () {
+			return re.readyState == 4 && aD.success && aD.success(re.response);
+		});
 		re.send(aD.type === 'GET' ? null : aD.data);
 	}
 	
 	function encodeFormat(obj) {
-		if (!obj) return '';
-		return Object.keys(obj).reduce(function (re, item) {
+		return !obj ? '' : Object.keys(obj).reduce(function (re, item) {
 			return re += '&' + item + '=' + obj[item];
 		}, '').slice(1);
 	}
@@ -1065,14 +1002,14 @@
 	function ajaxJsonp(ao) {
 		if (!ao.jsonp) throw new Error('请输入函数名称');
 		var fnName = 'jsonp' + '_' + jsonpId++;
-		ao.url = ao.url + ao.jsonp + '=' + fnName;
+		ao.url = ao.url + (ao.url.indexOf('?') == -1 ? '?' : '&') + ao.jsonp + '=' + fnName;
 		var script = document.createElement('script');
 		global[fnName] = function (response) {
 			try {
 				ao.success(response);
 			} finally {
 				delete global[fnName];
-				script.parentNode.removeChild(script);
+				script.remove();
 			}
 		};
 		script.src = ao.url;

@@ -32,9 +32,7 @@ class Single {
 
 	getRouter() {
 		let curURL = this.getURL(),
-			router = this.Routers.find(function(item) {
-				return item.url === curURL;
-			});
+			router = this.Routers[curURL];
 		return router ? router : this.Routers[0];
 	}
 
