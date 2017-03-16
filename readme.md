@@ -1,5 +1,3 @@
-参考：
-	[剖析vue实现原理，自己动手实现mvvm](https://github.com/DMQ/mvvm)
 
 采用 gulp + webpack + babel + ES6；
 引入后暴露全局变量Single;
