@@ -5,18 +5,18 @@
 引入后暴露全局变量Single;
 路由如下：
 
-    Single.Routers = [
+    Single.Routers = {
+    		home:
 		{
-			url:'home',
 			tempUrl:'view/index.html',
 			ctrUrl:'controller/index.js'
 		},
+		demo:
 		{
-			url:'demo',
 			tempUrl:'view/demo.html',
 			ctrUrl:'controller/demo.js'
 		}
-	];
+	};
 VM：
 
     Single.page = function(){
